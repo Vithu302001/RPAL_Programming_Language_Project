@@ -10,7 +10,8 @@ public class AST_Node {
     public Node_Type type;
     // public AST_Node left;
     // public AST_Node right;
-    public ArrayList<AST_Node> children = new ArrayList<AST_Node>();
+    public ArrayList<AST_Node> children = new ArrayList<AST_Node>(); // to store childrens of the node.This is no longer
+                                                                     // a binary tree.
 
     // public AST_Node(Token token, Node_Type type, AST_Node left, AST_Node right) {
     // this.value = token.value;
