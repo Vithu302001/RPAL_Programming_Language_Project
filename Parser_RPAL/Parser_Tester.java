@@ -16,15 +16,16 @@ public class Parser_Tester {
         RPAL_parser parser = new RPAL_parser(tokens);
         try {
             List<AST_Node> AST = parser.get_AST();
-            System.out.println(AST.size());
             parser.printTree(AST.get(0), 0);
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out
+                    .println("\n!! Your code have issues.Resolve it and try to compile again !! ");
             // for (Token token : tokens) {
             // System.out.println(token.type + ": " + token.value + " (Line: " + token.line
             // + ")");
         }
+
         // }
         /*
          * } catch (Exception e) {
@@ -34,6 +35,7 @@ public class Parser_Tester {
          * }
          * }
          */
+
     }
 
 }
