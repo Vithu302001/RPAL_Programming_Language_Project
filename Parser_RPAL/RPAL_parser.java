@@ -32,7 +32,9 @@ public class RPAL_parser {
         // }
         // stack.add(0, new AST_Node(token, type, p, null));
 
-        System.out.println("Build_AST called for " + token.value);
+        // System.out.println("Build_AST called for " + token.value);!!!!!for verifying
+        // purpose
+
         AST_Node parent = new AST_Node(token, type);
         for (int i = 0; i < noOfchildren; i++) {
             parent.AddChildren(stack.remove(stack.size() - 1));
@@ -74,20 +76,24 @@ public class RPAL_parser {
 
     private void Read(Token token, Node_Type type) {
         try {
-            if ((token.type.equals(TokenType.IDENTIFIER)) || (token.type.equals(TokenType.INTEGER))
-                    || (token.type.equals(TokenType.STRING))) {
-                // System.out.println("In the read function if condition for token : " +
-                // token.value);
-                stack.add(new AST_Node(token, type));
-                tokens.remove(token);
-            } else {
-                // System.out.println("In the read function else condition for token : " +
-                // token.value);
+            if (tokens.get(0).value.equals(token.value)) {
+                if ((token.type.equals(TokenType.IDENTIFIER)) || (token.type.equals(TokenType.INTEGER))
+                        || (token.type.equals(TokenType.STRING))) {
+                    // System.out.println("In the read function if condition for token : " +
+                    // token.value);
+                    stack.add(new AST_Node(token, type));
+                    tokens.remove(token);
+                } else {
+                    // System.out.println("In the read function else condition for token : " +
+                    // token.value);
 
-                tokens.remove(token);
+                    tokens.remove(token);
+                }
+            } else {
+                System.out.println("Expected : " + token.value);
             }
         } catch (Exception e) {
-            System.out.println("Error while removing");
+            System.out.println("Error while Parsing : " + e.getMessage());
         }
     }
 
@@ -721,6 +727,7 @@ public class RPAL_parser {
         }
     }
 
+    /* This function is for to print the desired format as mentioned in the pdf */
     private String addStrings(AST_Node node) {
         switch (node.type) {
             case IDENTIFIER:
