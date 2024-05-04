@@ -21,21 +21,22 @@ public class Standatizer {
 
         if (!node.isStandartized) {
             for (AST_Node child : node.children) {
+                // System.out.println("trying to standatize: " + node.value);
+
                 standardizeAST(child);
             }
 
             switch (node.type) {
                 case LET:
                     Let_Standatizer(node);
-                    printTree(node, 0);
+                    // printTree(node, 0);
                     break;
                 case WITHIN:
                     Within_Standatizer(node);
                     break;
                 case FCN_FORM:
                     FcnForm_Standatizer(node);
-                    printTree(node, 0);
-
+                    // printTree(node, 0);
                     break;
                 case AND:
                     And_Standatizer(node);
@@ -48,6 +49,10 @@ public class Standatizer {
                     break;
                 case AT:
                     At_Standatizer(node);
+                    break;
+                case LAMBDA:
+                    multi_param_function_Standatizer(node);
+                    printTree(node, 0);
                     break;
                 default:
                     // System.out.println("default case " + node.value);
@@ -70,7 +75,7 @@ public class Standatizer {
      */
 
     void Let_Standatizer(AST_Node node) {
-        System.out.println("Let_Standatizer");
+        // System.out.println("Let_Standatizer");
         AST_Node node_gamma = new AST_Node(new Token(null, "gamma"), Node_Type.GAMMA);
         AST_Node node_lambda = new AST_Node(new Token(null, "lambda"), Node_Type.LAMBDA);
 
@@ -103,7 +108,7 @@ public class Standatizer {
      */
 
     void Within_Standatizer(AST_Node node) {
-        System.out.println("Within_Standatizer");
+        // System.out.println("Within_Standatizer");
         AST_Node node_gamma = new AST_Node(new Token(null, "gamma"), Node_Type.GAMMA);
         AST_Node node_lambda = new AST_Node(new Token(null, "lambda"), Node_Type.LAMBDA);
         AST_Node node_equal = new AST_Node(new Token(null, "="), Node_Type.EQUAL);
@@ -171,7 +176,7 @@ public class Standatizer {
         node.type = node_equal.type;
         node.children = node_equal.children;
 
-        System.out.println("finished Fcn_Form standatize");
+        // System.out.println("finished Fcn_Form standatize");
     }
 
     /*
@@ -299,6 +304,34 @@ public class Standatizer {
         node.value = node_gamma_root.value;
         node.type = node_gamma_root.type;
         node.children = node_gamma_root.children;
+    }
+
+    void multi_param_function_Standatizer(AST_Node node) {
+
+        System.out.println("standatizing multi param lambda");
+        AST_Node node_lambda_top = new AST_Node(new Token(null, "lambda"), Node_Type.LAMBDA);
+
+        AST_Node current_node = node_lambda_top;
+
+        for (int i = node.children.size() - 1; i >= 1; i--) {
+            AST_Node node_lambda = new AST_Node(new Token(null, "lambda"), Node_Type.LAMBDA);
+            AST_Node temp = new AST_Node(new Token(null, "temp"), null);
+
+            node_lambda.children.add(temp);
+            node_lambda.children.add(node.children.get(i));
+
+            current_node.children.add(node_lambda);
+            current_node = node_lambda;
+        }
+        // System.out.println("here 1");
+        current_node.children.set(0, node.children.get(0));
+        // System.out.println("here 2");
+        node.value = node_lambda_top.value;
+        node.type = node_lambda_top.type;
+        node.children = node_lambda_top.children;
+
+        System.out.println("succesfully standatized lambda");
+
     }
 
     public void printTree(AST_Node node, int level) {
