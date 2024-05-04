@@ -10,6 +10,7 @@ public class AST_Node {
     public Node_Type type;
     // public AST_Node left;
     // public AST_Node right;
+    public boolean isStandartized = false;
     public ArrayList<AST_Node> children = new ArrayList<AST_Node>(); // to store childrens of the node.This is no longer
                                                                      // a binary tree.
 

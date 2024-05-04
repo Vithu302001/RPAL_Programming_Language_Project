@@ -37,7 +37,14 @@ public class RPAL_parser {
 
         AST_Node parent = new AST_Node(token, type);
         for (int i = 0; i < noOfchildren; i++) {
-            parent.AddChildren(stack.remove(stack.size() - 1));
+            AST_Node temp = stack.remove(stack.size() - 1);
+            try {
+
+                //System.out.println("remove from stack " + temp.value);
+                parent.AddChildren(temp);
+            } catch (Exception e) {
+                System.out.println("error while removing" + temp.value);
+            }
         }
         stack.add(parent);
     }
@@ -74,23 +81,26 @@ public class RPAL_parser {
      * else just consume token
      */
 
-    private void Read(Token token, Node_Type type) {
+    private void Read(String value, Node_Type type) {
         try {
-            if (tokens.get(0).value.equals(token.value)) {
-                if ((token.type.equals(TokenType.IDENTIFIER)) || (token.type.equals(TokenType.INTEGER))
-                        || (token.type.equals(TokenType.STRING))) {
+            if (tokens.get(0).value.equals(value)) {
+                if ((tokens.get(0).type.equals(TokenType.IDENTIFIER)) || (tokens.get(0).type.equals(TokenType.INTEGER))
+                        || (tokens.get(0).type.equals(TokenType.STRING))) {
+
                     // System.out.println("In the read function if condition for token : " +
-                    // token.value);
-                    stack.add(new AST_Node(token, type));
-                    tokens.remove(token);
+                    //         tokens.get(0).value);
+
+                    stack.add(new AST_Node(tokens.get(0), type));
+                    tokens.remove(tokens.get(0));
                 } else {
                     // System.out.println("In the read function else condition for token : " +
                     // token.value);
 
-                    tokens.remove(token);
+                    tokens.remove(tokens.get(0));
+                    //System.out.println(tokens.size());
                 }
             } else {
-                System.out.println("Expected : " + token.value);
+                System.out.println("Expected : " + value);
             }
         } catch (Exception e) {
             System.out.println("Error while Parsing at Line " + tokens.get(0).line + " \n" + e.getMessage());
@@ -103,13 +113,13 @@ public class RPAL_parser {
         // System.out.println("in E()");
         switch (tokens.get(0).value) {
             case "let":
-                Read(tokens.get(0), Node_Type.LET);// let
+                Read("let", Node_Type.LET);// let
 
                 D();// D
                 if (!tokens.get(0).value.equals("in")) {
                     System.out.println("'in' expected after let");
                 }
-                Read(tokens.get(0), Node_Type.IN);// in
+                Read("in", Node_Type.IN);// in
                 E();
 
                 // System.out.println("E -> 'let' D 'in' E");
@@ -118,7 +128,7 @@ public class RPAL_parser {
 
                 break;
             case "fn":
-                Read(tokens.get(0), Node_Type.FN);
+                Read("fn", Node_Type.FN);
                 // System.out.println(stack.isEmpty());
 
                 int count_variable_1 = 1;
@@ -130,7 +140,7 @@ public class RPAL_parser {
                 if (!tokens.get(0).value.equals(".")) {
                     System.out.println("'.' expected after");
                 }
-                Read(tokens.get(0), Node_Type.DOT);
+                Read(".", Node_Type.DOT);
                 E();
 
                 // System.out.println("E -> 'fn' Vb+ '.' E");
@@ -151,7 +161,7 @@ public class RPAL_parser {
         T();
         if (tokens.get(0).value.equals("where")) {
 
-            Read(tokens.get(0), Node_Type.WHERE);
+            Read("where", Node_Type.WHERE);
             Dr();
 
             // System.out.println("Ew -> T 'where' Dr");
@@ -170,7 +180,7 @@ public class RPAL_parser {
 
             int count_variable_2 = 1;
             do {
-                Read(tokens.get(0), Node_Type.COMMA);
+                Read(",", Node_Type.COMMA);
                 Ta();
                 count_variable_2++;
             } while (tokens.get(0).value.equals(","));
@@ -191,7 +201,7 @@ public class RPAL_parser {
 
         while (tokens.get(0).value.equals("aug")) {
 
-            Read(tokens.get(0), Node_Type.AUG);
+            Read("aug", Node_Type.AUG);
             Tc();
             // System.out.println("Ta -> Ta 'aug' Tc");
             Build_AST(new Token(null, "aug"), Node_Type.AUG, 2);
@@ -206,13 +216,13 @@ public class RPAL_parser {
         B();
         if (tokens.get(0).value.equals("->")) {
 
-            Read(tokens.get(0), Node_Type.CONDITIONAL);
+            Read("->", Node_Type.CONDITIONAL);
             Tc();
             if (!tokens.get(0).value.equals("|")) {
                 System.out.println("Expected '|' ");
 
             }
-            Read(tokens.get(0), Node_Type.STRAIGHT_BAR);
+            Read("|", Node_Type.STRAIGHT_BAR);
             Tc();
             // System.out.println("Tc -> B '->' Tc '|' Tc");
             Build_AST(new Token(null, "->"), Node_Type.CONDITIONAL, 3);
@@ -228,7 +238,7 @@ public class RPAL_parser {
 
         while (tokens.get(0).value.equals("or")) {
 
-            Read(tokens.get(0), Node_Type.Bool_OR);
+            Read("or", Node_Type.Bool_OR);
             Bt();
             // System.out.println("B ->B'or' Bt");
             Build_AST(new Token(null, "or"), Node_Type.Bool_OR, 2);
@@ -244,7 +254,7 @@ public class RPAL_parser {
 
         while (tokens.get(0).value.equals("&")) {
 
-            Read(tokens.get(0), Node_Type.Bool_AND);
+            Read("&", Node_Type.Bool_AND);
             Bs();
 
             // System.out.println("Bt -> Bt '&' Bs");
@@ -258,7 +268,7 @@ public class RPAL_parser {
         switch (tokens.get(0).value) {
             case "not":
 
-                Read(tokens.get(0), Node_Type.Bool_NOT);
+                Read("not", Node_Type.Bool_NOT);
                 Bp();
 
                 // System.out.println("Bs -> 'not' Bp");
@@ -279,70 +289,70 @@ public class RPAL_parser {
 
             switch (tokens.get(0).value) {
                 case "gr":
-                    Read(tokens.get(0), Node_Type.GR);
+                    Read("gr", Node_Type.GR);
                     A();
 
                     // System.out.println("Bp -> A 'gr' A");
                     Build_AST(new Token(null, "gr"), Node_Type.GR, 2);
                     break;
                 case ">":
-                    Read(tokens.get(0), Node_Type.GR);
+                    Read(">", Node_Type.GR);
                     A();
 
                     // System.out.println("Bp -> A '>' A");
                     Build_AST(new Token(null, "gr"), Node_Type.GR, 2);
                     break;
                 case "ge":
-                    Read(tokens.get(0), Node_Type.GE);
+                    Read("ge", Node_Type.GE);
                     A();
 
                     // System.out.println("Bp -> A 'ge' A");
                     Build_AST(new Token(null, "ge"), Node_Type.GE, 2);
                     break;
                 case ">=":
-                    Read(tokens.get(0), Node_Type.GE);
+                    Read(">=", Node_Type.GE);
                     A();
 
                     // System.out.println("Bp -> A '>=' A");
                     Build_AST(new Token(null, "ge"), Node_Type.GE, 2);
                     break;
                 case "ls":
-                    Read(new Token(null, "ls"), Node_Type.LS);
+                    Read("ls", Node_Type.LS);
                     A();
 
                     // System.out.println("Bp -> A 'ls' A");
                     Build_AST(new Token(null, "ls"), Node_Type.LS, 2);
                     break;
                 case "<":
-                    Read(tokens.get(0), Node_Type.LS);
+                    Read("<", Node_Type.LS);
                     A();
 
                     // System.out.println("Bp -> A '<' A");
                     Build_AST(new Token(null, "ls"), Node_Type.LS, 2);
                     break;
                 case "<=":
-                    Read(tokens.get(0), Node_Type.LS);
+                    Read("<=", Node_Type.LE);
                     A();
 
                     // System.out.println("Bp -> A '<=' A");
                     Build_AST(new Token(null, "le"), Node_Type.LE, 2);
                     break;
                 case "le":
-                    Read(tokens.get(0), Node_Type.LS);
+                    Read("le", Node_Type.LE);
                     A();
 
                     // System.out.println("Bp -> A 'le' A");
                     Build_AST(new Token(null, "le"), Node_Type.LE, 2);
                     break;
                 case "eq":
-                    Read(tokens.get(0), Node_Type.EQ);
+                    Read("eq", Node_Type.EQ);
                     A();
 
                     // System.out.println("Bp -> A 'eq' A");
                     Build_AST(new Token(null, "eq"), Node_Type.EQ, 2);
                     break;
                 case "ne":
-                    Read(tokens.get(0), Node_Type.NE);
+                    Read("ne", Node_Type.NE);
                     A();
 
                     // System.out.println("Bp -> A 'ne' A");
@@ -361,13 +371,13 @@ public class RPAL_parser {
 
         switch (tokens.get(0).value) {
             case "+":
-                Read(tokens.get(0), Node_Type.PLUS);
+                Read("+", Node_Type.PLUS);
                 At();
 
                 // System.out.println("A ->'+' At");
                 break;
             case "-":
-                Read(tokens.get(0), Node_Type.MINUS);
+                Read("-", Node_Type.MINUS);
                 At();
 
                 // System.out.println("A ->'-' At");
@@ -381,13 +391,13 @@ public class RPAL_parser {
         while (tokens.get(0).value.equals("+") || tokens.get(0).value.equals("-")) {
 
             if (tokens.get(0).value.equals("+")) {
-                Read(tokens.get(0), Node_Type.PLUS);
+                Read("+", Node_Type.PLUS);
                 At();
 
                 // System.out.println("A ->'+' At");
                 Build_AST(new Token(null, "+"), Node_Type.PLUS, 2);
             } else if (tokens.get(0).value.equals("-")) {
-                Read(tokens.get(0), Node_Type.MINUS);
+                Read("-", Node_Type.MINUS);
                 At();
 
                 // System.out.println("A ->'-' At");
@@ -405,14 +415,14 @@ public class RPAL_parser {
         while ((tokens.get(0).value.equals("*")) || (tokens.get(0).value.equals("/"))) {
             if (tokens.get(0).value.equals("*")) {
 
-                Read(tokens.get(0), Node_Type.MUL);
+                Read("*", Node_Type.MUL);
                 Af();
 
                 // System.out.println("At -> At '*' Af");
                 Build_AST(new Token(null, "*"), Node_Type.MUL, 2);
             } else if (tokens.get(0).value.equals("/")) {
 
-                Read(tokens.get(0), Node_Type.DIVISION);
+                Read("/", Node_Type.DIVISION);
                 Af();
 
                 // System.out.println("At -> At '/' Af");
@@ -427,7 +437,7 @@ public class RPAL_parser {
         Ap();
         if (tokens.get(0).value.equals("**")) {
 
-            Read(tokens.get(0), Node_Type.POWER);
+            Read("**", Node_Type.POWER);
             Af();
 
             // System.out.println("Af -> Ap '**' Af");
@@ -444,12 +454,12 @@ public class RPAL_parser {
 
         while (tokens.get(0).value.equals("@")) {
 
-            Read(tokens.get(0), Node_Type.AT);
+            Read("@", Node_Type.AT);
             if (!tokens.get(0).type.equals(TokenType.IDENTIFIER)) {
                 System.out.println("error while parsing at Ap: IDENTIFIER expected in Line " + tokens.get(0).line);
             }
             // need to check this logic
-            Read(tokens.get(0), Node_Type.IDENTIFIER);
+            Read(tokens.get(0).value, Node_Type.IDENTIFIER);
             R();
 
             // System.out.println("Ap -> Ap '@' '<IDENTIFIER>' R");
@@ -480,45 +490,45 @@ public class RPAL_parser {
                 || (Arrays.asList("true", "false", "nil", "(", "dummy").contains(tokens.get(0).value))) {
             switch (tokens.get(0).type) {
                 case IDENTIFIER:
-                    Read(tokens.get(0), Node_Type.IDENTIFIER);
+                    Read(tokens.get(0).value, Node_Type.IDENTIFIER);
 
                     // System.out.println("Rn -> '<IDENTIFIER>'");
                     break;
                 case INTEGER:
-                    Read(tokens.get(0), Node_Type.INTEGER);
+                    Read(tokens.get(0).value, Node_Type.INTEGER);
 
                     // System.out.println("Rn -> '<INTEGER>'");
                     break;
                 case STRING:
-                    Read(tokens.get(0), Node_Type.STRING);
+                    Read(tokens.get(0).value, Node_Type.STRING);
 
                     // System.out.println("Rn -> '<STRING>'");
                     break;
                 case KEYWORD:
                     if (tokens.get(0).value.equals("true")) {
 
-                        Read(tokens.get(0), Node_Type.T_TRUE);
+                        Read("true", Node_Type.T_TRUE);
 
                         // System.out.println("Rn -> 'true'");
                         Build_AST(new Token(null, "true"), Node_Type.T_TRUE, 0);
                         break;
                     } else if (tokens.get(0).value.equals("false")) {
 
-                        Read(tokens.get(0), Node_Type.T_FALSE);
+                        Read("false", Node_Type.T_FALSE);
 
                         // System.out.println("Rn -> 'false'");
                         Build_AST(new Token(null, "false"), Node_Type.T_FALSE, 0);
                         break;
                     } else if (tokens.get(0).value.equals("nil")) {
 
-                        Read(tokens.get(0), Node_Type.NIL);
+                        Read("nil", Node_Type.NIL);
 
                         // System.out.println("Rn -> 'nil'");
                         Build_AST(new Token(null, "nil"), Node_Type.NIL, 0);
                         break;
                     } else if (tokens.get(0).value.equals("dummy")) {
 
-                        Read(tokens.get(0), Node_Type.DUMMY);
+                        Read("dummy", Node_Type.DUMMY);
 
                         // System.out.println("Rn -> 'dummy'");
                         Build_AST(new Token(null, "dummy"), Node_Type.DUMMY, 0);
@@ -526,12 +536,12 @@ public class RPAL_parser {
                     }
                 case PUNCTUATION:
                     if (tokens.get(0).value.equals("(")) {
-                        Read(tokens.get(0), Node_Type.LEFT_PAREN);
+                        Read("(", Node_Type.LEFT_PAREN);
                         E();
                         if (!tokens.get(0).value.equals(")")) {
                             System.out.println("Expected '('");
                         }
-                        Read(tokens.get(0), Node_Type.RIGHT_PAREN);
+                        Read(")", Node_Type.RIGHT_PAREN);
 
                         // System.out.println("Rn -> '( E )'");
                         break;
@@ -556,7 +566,7 @@ public class RPAL_parser {
         Da();
         if (tokens.get(0).value.equals("within")) {
             Token T_within = new Token(null, "within");
-            Read(tokens.get(0), Node_Type.WITHIN);
+            Read("within", Node_Type.WITHIN);
             D();
 
             // System.out.println("D -> Da 'within' D");
@@ -578,12 +588,12 @@ public class RPAL_parser {
 
         if (tokens.get(0).value.equals("and")) {
 
-            Read(tokens.get(0), Node_Type.AND);
+            Read("and", Node_Type.AND);
             Dr();
             int count_variable_3 = 1;
 
             while (tokens.get(0).value.equals("and")) {
-                Read(tokens.get(0), Node_Type.AND);
+                Read("and", Node_Type.AND);
                 Dr();
                 count_variable_3++;
             }
@@ -599,7 +609,7 @@ public class RPAL_parser {
 
         if (tokens.get(0).value.equals("rec")) {
 
-            Read(tokens.get(0), Node_Type.REC);
+            Read("rec", Node_Type.REC);
             Db();
 
             // System.out.println("Dr -> 'rec' Db");
@@ -614,12 +624,12 @@ public class RPAL_parser {
         // System.out.println("in Db()");
 
         if (tokens.get(0).value.equals("(")) {
-            Read(tokens.get(0), Node_Type.LEFT_PAREN);
+            Read("(", Node_Type.LEFT_PAREN);
             D();
             if (!tokens.get(0).value.equals(")")) {
                 System.out.println("Error while parsing at Db: expected ')' in Line " + tokens.get(0).line);
             }
-            Read(tokens.get(0), Node_Type.RIGHT_PAREN);
+            Read(")", Node_Type.RIGHT_PAREN);
 
             // System.out.println("Db -> '(' D ')' ");
         } else if (tokens.get(0).type.equals(TokenType.IDENTIFIER)) {
@@ -637,7 +647,7 @@ public class RPAL_parser {
 
             if ((LL2.type.equals(TokenType.IDENTIFIER)) || (LL2.value.equals("("))) {
 
-                Read(tokens.get(0), Node_Type.IDENTIFIER);
+                Read(tokens.get(0).value, Node_Type.IDENTIFIER);
 
                 if ((tokens.get(0).type.equals(TokenType.IDENTIFIER)) || (tokens.get(0).value.equals("("))) {
                     Vb();
@@ -651,7 +661,7 @@ public class RPAL_parser {
                     if (!tokens.get(0).value.equals("=")) {
                         System.out.println("Error while parsing at Db: expecting '=' in Line " + tokens.get(0).line);
                     }
-                    Read(tokens.get(0), Node_Type.EQUAL);
+                    Read("=", Node_Type.EQUAL);
                     E();
 
                     // System.out.println("Db -> '<IDENTIFIER>' Vb+ '=' E");
@@ -659,8 +669,9 @@ public class RPAL_parser {
                 }
 
             } else {
-
-                Read(tokens.get(0), Node_Type.EQUAL);
+                //System.out.println("Here...");
+                Vl();
+                Read("=", Node_Type.EQUAL);
                 E();
 
                 // System.out.println("Db -> Vl '=' E");
@@ -680,10 +691,10 @@ public class RPAL_parser {
         if (tokens.get(0).value.equals("(")) {
             // System.out.println("Check 2");
 
-            Read(tokens.get(0), Node_Type.LEFT_PAREN);
+            Read("(", Node_Type.LEFT_PAREN);
             if (tokens.get(0).value.equals(")")) {
 
-                Read(tokens.get(0), Node_Type.RIGHT_PAREN);
+                Read(")", Node_Type.RIGHT_PAREN);
 
                 // System.out.println("Vb -> '(' ')'");
                 Build_AST(new Token(null, "()"), Node_Type.PARENTHESIS, 0);// need to check children count
@@ -692,12 +703,12 @@ public class RPAL_parser {
                 if (!tokens.get(0).value.equals(")")) {
                     System.out.println("Error while parsing at Vb: expected ')' in Line " + tokens.get(0).line);
                 }
-                Read(tokens.get(0), Node_Type.RIGHT_PAREN);
+                Read(")", Node_Type.RIGHT_PAREN);
 
                 // System.out.println("Vb -> '(' Vl ')'");
             }
         } else {
-            Read(tokens.get(0), Node_Type.IDENTIFIER);
+            Read(tokens.get(0).value, Node_Type.IDENTIFIER);
             // System.out.println("Vb -> '<IDENTIFIER>'");
         }
 
@@ -706,18 +717,18 @@ public class RPAL_parser {
     private void Vl() {
         // System.out.println("in Vl()");
 
-        Read(tokens.get(0), Node_Type.IDENTIFIER);
+        Read(tokens.get(0).value, Node_Type.IDENTIFIER);
 
         int count_variable_5 = 0;
         Token T_comma = new Token(null, ",");
 
         while (tokens.get(0).value.equals(",")) {
-            Read(tokens.get(0), Node_Type.COMMA);
+            Read(",", Node_Type.COMMA);
             if (tokens.get(0).type != TokenType.IDENTIFIER) {
                 System.out.println("Error while Parsing at Vl; expected IDENTIFIER in Line " + tokens.get(0).line);
 
             }
-            Read(tokens.get(0), Node_Type.IDENTIFIER);// !!!!!need to verify is it correct
+            Read(tokens.get(0).value, Node_Type.IDENTIFIER);// !!!!!need to verify is it correct
             count_variable_5++;
 
         }

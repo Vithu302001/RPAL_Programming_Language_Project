@@ -14,17 +14,23 @@ public class Parser_Tester {
         List<Token> tokens = lexicalAnalyser.scanner();
 
         RPAL_parser parser = new RPAL_parser(tokens);
-        try {
-            List<AST_Node> AST = parser.get_AST();
-            parser.printTree(AST.get(0), 0);
+        // try {
+        List<AST_Node> AST = parser.get_AST();
+        // System.out.println(AST.get(0).value);
+        // System.out.println(AST.get(0).children.get(1).children.get(0).value);
+        parser.printTree(AST.get(0), 0);
 
-        } catch (Exception e) {
-            System.out
-                    .println("\n!! Your code have issues.Resolve it and try to compile again !! ");
-            // for (Token token : tokens) {
-            // System.out.println(token.type + ": " + token.value + " (Line: " + token.line
-            // + ")");
-        }
+        // } catch (Exception e) {
+        // System.out
+        // .println("\n!! Your code have issues.Resolve it and try to compile again !!
+        // ");
+
+        // System.out.println(e.getMessage());
+        // // for (Token token : tokens) {
+        // // System.out.println(token.type + ": " + token.value + " (Line: " +
+        // token.line
+        // // + ")");
+        // }
 
         // }
         /*
