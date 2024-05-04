@@ -22,10 +22,9 @@ public class Standatizer_Tester {
 
         } catch (Exception e) {
             System.out
-                    .println("\n!! Your code have issues.Resolve it and try to compile again !! ");
-            // for (Token token : tokens) {
-            // System.out.println(token.type + ": " + token.value + " (Line: " + token.line
-            // + ")");
+                    .println("\n!! Standatizing the tree went wrong! ");
+            System.out.println(e.getLocalizedMessage());
+
         }
     }
 
