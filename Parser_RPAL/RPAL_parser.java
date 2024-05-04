@@ -40,13 +40,14 @@ public class RPAL_parser {
             AST_Node temp = stack.remove(stack.size() - 1);
             try {
 
-                //System.out.println("remove from stack " + temp.value);
+                System.out.println("remove from stack " + temp.value);
                 parent.AddChildren(temp);
             } catch (Exception e) {
                 System.out.println("error while removing" + temp.value);
             }
         }
         stack.add(parent);
+        System.out.println("succesfully added to stack :" + parent.value + ",children" + parent.children.size());
     }
 
     public List<AST_Node> get_AST() {
@@ -87,17 +88,18 @@ public class RPAL_parser {
                 if ((tokens.get(0).type.equals(TokenType.IDENTIFIER)) || (tokens.get(0).type.equals(TokenType.INTEGER))
                         || (tokens.get(0).type.equals(TokenType.STRING))) {
 
-                    // System.out.println("In the read function if condition for token : " +
-                    //         tokens.get(0).value);
+                    System.out.println("In the read function if condition for token : " +
+                            tokens.get(0).value);
 
                     stack.add(new AST_Node(tokens.get(0), type));
+                    System.out.println("added to stack successfully:" + tokens.get(0).value);
                     tokens.remove(tokens.get(0));
                 } else {
-                    // System.out.println("In the read function else condition for token : " +
-                    // token.value);
+                    System.out.println("In the read function else condition for token : " +
+                            tokens.get(0).value);
 
                     tokens.remove(tokens.get(0));
-                    //System.out.println(tokens.size());
+                    System.out.println(tokens.size());
                 }
             } else {
                 System.out.println("Expected : " + value);
@@ -110,7 +112,7 @@ public class RPAL_parser {
     private void E() {
         // System.out.println(tokens.size());
 
-        // System.out.println("in E()");
+        System.out.println("in E()");
         switch (tokens.get(0).value) {
             case "let":
                 Read("let", Node_Type.LET);// let
@@ -144,7 +146,7 @@ public class RPAL_parser {
                 E();
 
                 // System.out.println("E -> 'fn' Vb+ '.' E");
-                Build_AST(new Token(null, "lambda"), Node_Type.LAMBDA, count_variable_1);
+                Build_AST(new Token(null, "lambda"), Node_Type.LAMBDA, count_variable_1 + 1);
                 // System.out.println(stack.isEmpty()); //for testing purposes
 
                 break;
@@ -156,7 +158,7 @@ public class RPAL_parser {
     }
 
     private void Ew() {
-        // System.out.println("in Ew()");
+        System.out.println("in Ew()");
 
         T();
         if (tokens.get(0).value.equals("where")) {
@@ -173,7 +175,7 @@ public class RPAL_parser {
     }
 
     private void T() {
-        // System.out.println("in T()");
+        System.out.println("in T()");
 
         Ta();
         if (tokens.get(0).value.equals(",")) {
@@ -194,7 +196,7 @@ public class RPAL_parser {
     }
 
     private void Ta() {
-        // System.out.println("in Ta()");
+        System.out.println("in Ta()");
 
         Tc();
         // System.out.println("Ta -> Tc");
@@ -211,7 +213,7 @@ public class RPAL_parser {
     }
 
     private void Tc() {
-        // System.out.println("in Tc()");
+        System.out.println("in Tc()");
 
         B();
         if (tokens.get(0).value.equals("->")) {
@@ -231,7 +233,7 @@ public class RPAL_parser {
     }
 
     private void B() {
-        // System.out.println("in B()");
+        System.out.println("in B()");
 
         Bt();
         // System.out.println("B -> Bt");
@@ -247,7 +249,7 @@ public class RPAL_parser {
     }
 
     private void Bt() {
-        // System.out.println("in Bt()");
+        System.out.println("in Bt()");
 
         Bs();
         // System.out.println("Bt -> Bs");
@@ -263,7 +265,7 @@ public class RPAL_parser {
     }
 
     private void Bs() {
-        // System.out.println("in Bs()");
+        System.out.println("in Bs()");
 
         switch (tokens.get(0).value) {
             case "not":
@@ -280,7 +282,7 @@ public class RPAL_parser {
     }
 
     private void Bp() {
-        // System.out.println("in Bp()");
+        System.out.println("in Bp()");
 
         List<String> operatorsList = Arrays.asList("gr", ">", "ge", ">=", "ls", "<", "le", "<=", "eq", "ne");
         A();
@@ -367,7 +369,7 @@ public class RPAL_parser {
     }
 
     private void A() {
-        // System.out.println("in A()");
+        System.out.println("in A()");
 
         switch (tokens.get(0).value) {
             case "+":
@@ -407,7 +409,7 @@ public class RPAL_parser {
     }
 
     private void At() {
-        // System.out.println("in At()");
+        System.out.println("in At()");
 
         Af();
         // System.out.println("At -> Af");
@@ -432,7 +434,7 @@ public class RPAL_parser {
     }
 
     private void Af() {
-        // System.out.println("in Af()");
+        System.out.println("in Af()");
 
         Ap();
         if (tokens.get(0).value.equals("**")) {
@@ -447,7 +449,7 @@ public class RPAL_parser {
     }
 
     private void Ap() {
-        // System.out.println("in Ap()");
+        System.out.println("in Ap()");
 
         R();
         // System.out.println("Ap -> R");
@@ -468,7 +470,7 @@ public class RPAL_parser {
     }
 
     private void R() {
-        // System.out.println("in R()");
+        System.out.println("in R()");
         Rn();
         // System.out.println("R -> Rn");
 
@@ -484,7 +486,7 @@ public class RPAL_parser {
     }
 
     private void Rn() {
-        // System.out.println("in Rn()");
+        System.out.println("in Rn()");
 
         if ((Arrays.asList(TokenType.IDENTIFIER, TokenType.INTEGER, TokenType.STRING).contains(tokens.get(0).type))
                 || (Arrays.asList("true", "false", "nil", "(", "dummy").contains(tokens.get(0).value))) {
@@ -561,7 +563,7 @@ public class RPAL_parser {
     }
 
     private void D() {
-        // System.out.println("in D()");
+        System.out.println("in D()");
 
         Da();
         if (tokens.get(0).value.equals("within")) {
@@ -582,7 +584,7 @@ public class RPAL_parser {
     }
 
     private void Da() {
-        // System.out.println("in Da()");
+        System.out.println("in Da()");
 
         Dr();
 
@@ -599,13 +601,13 @@ public class RPAL_parser {
             }
 
             // System.out.println("Da -> Dr ( 'and' Dr )+");
-            Build_AST(new Token(null, "and"), Node_Type.AND, count_variable_3);
+            Build_AST(new Token(null, "and"), Node_Type.AND, count_variable_3 + 1);
         }
         // System.out.println("Da -> Dr");
     }
 
     private void Dr() {
-        // System.out.println("in Dr()");
+        System.out.println("in Dr()");
 
         if (tokens.get(0).value.equals("rec")) {
 
@@ -621,7 +623,7 @@ public class RPAL_parser {
     }
 
     private void Db() {
-        // System.out.println("in Db()");
+        System.out.println("in Db()");
 
         if (tokens.get(0).value.equals("(")) {
             Read("(", Node_Type.LEFT_PAREN);
@@ -669,7 +671,7 @@ public class RPAL_parser {
                 }
 
             } else {
-                //System.out.println("Here...");
+                // System.out.println("Here...");
                 Vl();
                 Read("=", Node_Type.EQUAL);
                 E();
@@ -686,7 +688,7 @@ public class RPAL_parser {
     }
 
     private void Vb() {
-        // System.out.println("in Vb()");
+        System.out.println("in Vb()");
 
         if (tokens.get(0).value.equals("(")) {
             // System.out.println("Check 2");
@@ -715,7 +717,7 @@ public class RPAL_parser {
     }
 
     private void Vl() {
-        // System.out.println("in Vl()");
+        System.out.println("in Vl()");
 
         Read(tokens.get(0).value, Node_Type.IDENTIFIER);
 
