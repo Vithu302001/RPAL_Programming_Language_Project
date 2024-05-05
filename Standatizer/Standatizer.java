@@ -29,46 +29,46 @@ public class Standatizer {
             switch (node.type) {
                 case LET:
                     Let_Standatizer(node);
-                    System.out.println("standatizing LET");
-                    printTree(node, 0);
+                    // System.out.println("standatizing LET");
+                    // printTree(node, 0);
                     break;
                 case WITHIN:
                     Within_Standatizer(node);
-                    System.out.println("standatizing WITHIN");
-                    printTree(node, 0);
+                    // System.out.println("standatizing WITHIN");
+                    // printTree(node, 0);
                     break;
                 case FCN_FORM:
                     FcnForm_Standatizer(node);
-                    System.out.println("standatizing FCN_FORM");
-                    printTree(node, 0);
+                    // System.out.println("standatizing FCN_FORM");
+                    // printTree(node, 0);
                     break;
                 case AND:
                     And_Standatizer(node);
-                    System.out.println("standatizing AND");
-                    printTree(node, 0);
+                    // System.out.println("standatizing AND");
+                    // printTree(node, 0);
                     break;
                 case WHERE:
                     Where_Standatizer(node);
-                    System.out.println("standatizing WHERE");
-                    printTree(node, 0);
+                    // System.out.println("standatizing WHERE");
+                    // printTree(node, 0);
                     break;
                 case REC:
                     Rec_Standatizer(node);
-                    System.out.println("standatizing REC");
-                    printTree(node, 0);
+                    // System.out.println("standatizing REC");
+                    // printTree(node, 0);
                     break;
                 case AT:
                     At_Standatizer(node);
-                    System.out.println("standatizing AT");
-                    printTree(node, 0);
+                    // System.out.println("standatizing AT");
+                    // printTree(node, 0);
                     break;
                 case LAMBDA:
                     if (node.children.size() > 2) {
                         multi_param_function_Standatizer(node);
                         // printTree(node, 0);
                     }
-                    System.out.println("standatizing LAMBDA");
-                    printTree(node, 0);
+                    // System.out.println("standatizing LAMBDA");
+                    // printTree(node, 0);
                     break;
                 default:
                     // System.out.println("default case " + node.value);
