@@ -29,32 +29,46 @@ public class Standatizer {
             switch (node.type) {
                 case LET:
                     Let_Standatizer(node);
-                    // printTree(node, 0);
+                    System.out.println("standatizing LET");
+                    printTree(node, 0);
                     break;
                 case WITHIN:
                     Within_Standatizer(node);
+                    System.out.println("standatizing WITHIN");
+                    printTree(node, 0);
                     break;
                 case FCN_FORM:
                     FcnForm_Standatizer(node);
-                    // printTree(node, 0);
+                    System.out.println("standatizing FCN_FORM");
+                    printTree(node, 0);
                     break;
                 case AND:
                     And_Standatizer(node);
+                    System.out.println("standatizing AND");
+                    printTree(node, 0);
                     break;
                 case WHERE:
                     Where_Standatizer(node);
+                    System.out.println("standatizing WHERE");
+                    printTree(node, 0);
                     break;
                 case REC:
                     Rec_Standatizer(node);
+                    System.out.println("standatizing REC");
+                    printTree(node, 0);
                     break;
                 case AT:
                     At_Standatizer(node);
+                    System.out.println("standatizing AT");
+                    printTree(node, 0);
                     break;
                 case LAMBDA:
                     if (node.children.size() > 2) {
                         multi_param_function_Standatizer(node);
                         // printTree(node, 0);
                     }
+                    System.out.println("standatizing LAMBDA");
+                    printTree(node, 0);
                     break;
                 default:
                     // System.out.println("default case " + node.value);
@@ -65,16 +79,16 @@ public class Standatizer {
 
     }
 
-    /*
-     * LET
-     *
-     * let => gamma
-     * / \ / \
-     * = P lambda E
-     * / \ / \
-     * X E X P
-     * 
-     */
+	/*
+	 * LET
+	 *
+	let => 		gamma 
+	/ \ 	   / 	\ 
+	=	P   lambda   E
+	/ \   	 / \ 
+	X E  	 X  P
+	
+	*/
 
     void Let_Standatizer(AST_Node node) {
         // System.out.println("Let_Standatizer");
@@ -97,17 +111,16 @@ public class Standatizer {
 
     }
 
-    /*
-     * //within
-     * 
-     * within => =
-     * / \ / \
-     * = = X2 gamma
-     * / \ / \ / \
-     * X1 E1 X2 E2 lambda E1
-     * / \
-     * X1 E2
-     */
+	/*	//within
+	 * 
+				within    	=>    	    	    =     
+		      /      \              		  /   \    
+		     =         =         		 	X2  gamma 
+		    / \       /   \             		/    \  
+		 X1  E1      X2   E2       			 lambda   E1 
+					                    	   /  \       
+		                    			   	  X1   E2 
+	 */
 
     void Within_Standatizer(AST_Node node) {
         // System.out.println("Within_Standatizer");
@@ -137,13 +150,13 @@ public class Standatizer {
     }
 
     /*
-     * fcn_form
-     * fcn_form =
-     * / | \ / \
-     * P V+ E => P +lambda
-     * / \
-     * V .E
-     */
+	 * fcn_form
+	 	fcn_form   		       	    =
+     	 /   |  \         		   / \
+   	 	P   V+   E       =>   	  P   +lambda
+	                         		 	 /  \
+                         				V   .E 
+	 */
 
     void FcnForm_Standatizer(AST_Node node) {
         AST_Node node_equal = new AST_Node(new Token(null, "="), Node_Type.EQUAL);
@@ -181,16 +194,15 @@ public class Standatizer {
         // System.out.println("finished Fcn_Form standatize");
     }
 
-    /*
-     * and
-     * 
-     * and => =
-     * | / \
-     * =++ , tau
-     * / \ | |
-     * X E X++ E++
-     * 
-     */
+	/* and
+	 * 
+	 	  and     =>         =       
+           |             	/ \      
+          =++              ,    tau    
+          / \              |      |     
+         X   E             X++   E++   
+
+	 */
 
     void And_Standatizer(AST_Node node) {
         AST_Node node_equal = new AST_Node(new Token(null, "="), Node_Type.EQUAL);
@@ -213,16 +225,16 @@ public class Standatizer {
         node.children = node_equal.children;
     }
 
-    /*
-     * where
-     * 
-     * gamma where
-     * / \ / \
-     * lambda E <= P =
-     * / \ / \
-     * X P X E
-     * 
-     */
+	/*
+	 * where
+	 * 
+	    gamma 		          where
+         / \                  / \
+	lambda   E       <=      P   =   
+   	/  \                   		/ \  
+   X    P                      X   E 
+
+	 */
 
     void Where_Standatizer(AST_Node node) {
         AST_Node node_gamma = new AST_Node(new Token(null, "gamma"), Node_Type.GAMMA);
@@ -244,17 +256,16 @@ public class Standatizer {
         node.children = node_gamma.children;
     }
 
-    /*
-     * rec
-     * 
-     * rec => =
-     * | / \
-     * = X gamma
-     * / \ / \
-     * X E Ystar lambda
-     * / \
-     * X E
-     */
+	/* rec
+	 
+	   rec     =>           =
+        |                  / \
+        =                 X   gamma
+       / \                   /   \
+      X   E           		Ystar  lambda
+                          		   /  \
+                          		  X    E
+	 */
 
     void Rec_Standatizer(AST_Node node) {
         AST_Node node_gamma = new AST_Node(new Token(null, "gamma"), Node_Type.GAMMA);
@@ -279,15 +290,13 @@ public class Standatizer {
         node.children = node_equal.children;
     }
 
-    /*
-     * @
-     * 
-     * @ => gamma
-     * / | \ / \
-     * E1 N E2 gamma E2
-     * / \
-     * N E1
-     */
+	/* @
+	     @      =>      gamma
+      / | \            	/   \
+   	 E1 N  E2  		  gamma  E2
+                       /  \
+              	      N    E1
+	 */
 
     void At_Standatizer(AST_Node node) {
         AST_Node node_gamma_root = new AST_Node(new Token(null, "gamma"), Node_Type.GAMMA);
@@ -307,6 +316,12 @@ public class Standatizer {
         node.type = node_gamma_root.type;
         node.children = node_gamma_root.children;
     }
+
+    /*
+     *       Lambda              ++Lambda
+     *        /  \      =>        /  \
+     *      V++   E              V   .E
+     */
 
     void multi_param_function_Standatizer(AST_Node node) {
         // System.out.println("standatizing multi param lambda");
