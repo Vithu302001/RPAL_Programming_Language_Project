@@ -45,7 +45,7 @@ public class CSEMachineFactory {
             case "tau":
                 return new Tau(node.children.size());
             // ystar
-            case "<Ystar>":
+            case "Ystar":
                 return new Ystar(); // need to check!!!!!!!!!!!!
             // operands <ID:>, <INT:>, <STR:>, <nil>, <true>, <false>, <dummy>
             default:
