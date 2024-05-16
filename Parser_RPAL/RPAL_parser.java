@@ -39,7 +39,6 @@ public class RPAL_parser {
         for (int i = 0; i < noOfchildren; i++) {
             AST_Node temp = stack.remove(stack.size() - 1);
             try {
-
                 // System.out.println("remove from stack " + temp.value);
                 parent.AddChildren(temp);
             } catch (Exception e) {
@@ -103,7 +102,7 @@ public class RPAL_parser {
                     // System.out.println(tokens.size());
                 }
             } else {
-                System.out.println("Expected : " + value);
+                System.out.println("Expected : " + value + "in Line"+ tokens.get(0).line + " \n");
             }
         } catch (Exception e) {
             System.out.println("Error while Parsing at Line " + tokens.get(0).line + " \n" + e.getMessage());

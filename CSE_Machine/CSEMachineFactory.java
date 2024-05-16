@@ -8,7 +8,7 @@ import Parser_RPAL.AST_Node;
 import Parser_RPAL.Node_Type;
 
 public class CSEMachineFactory {
-    private E e0 = new E(0);
+    private Environment e0 = new Environment(0);
     private int i = 1;
     private int j = 0;
 
@@ -18,11 +18,13 @@ public class CSEMachineFactory {
 
     public Symbol getSymbol(AST_Node node) {
         switch (node.value) {
-            // unary operators
+
+            // for unary operators
             case "not":
             case "neg":
                 return new Uop(node.value);
-            // binary operators
+                
+            // for binary operators
             case "+":
             case "-":
             case "*":
@@ -30,14 +32,14 @@ public class CSEMachineFactory {
             case "**":
             case "&":
             case "or":
-            case "eq":
-            case "ne":
-            case "ls":
-            case "le":
             case "gr":
             case "ge":
+            case "ls":
+            case "le":
+            case "eq":
+            case "ne":
             case "aug":
-                return new Bop(node.value);
+                return new Binary_Op(node.value);
             // gamma
             case "gamma":
                 return new Gamma();
@@ -47,37 +49,39 @@ public class CSEMachineFactory {
             // ystar
             case "Ystar":
                 return new Ystar(); // need to check!!!!!!!!!!!!
-            // operands <ID:>, <INT:>, <STR:>, <nil>, <true>, <false>, <dummy>
+
+            // if operands in type of IDETIFIER, INTEGER, STRING, NIL, TRUE, FALSE, DUMMY
             default:
                 if (node.type.equals(Node_Type.IDENTIFIER)) {
                     return new Id(node.value);
+                } else if (node.type.equals(Node_Type.STRING)) {
+                    return new Str(node.value);
                 } else if (node.type.equals(Node_Type.INTEGER)) {
                     return new Int(node.value);
-                } else if (node.type.equals(Node_Type.IDENTIFIER)) {
-                    return new Str(node.value);
-                } else if (node.type.equals(Node_Type.IDENTIFIER)) {
+                } else if (node.type.equals(Node_Type.NIL)) {
                     return new Tup();
-                } else if (node.type.equals(Node_Type.IDENTIFIER)) {
-                    return new Bool("true");
-                } else if (node.type.equals(Node_Type.IDENTIFIER)) {
+                } else if (node.type.equals(Node_Type.T_FALSE)) {
                     return new Bool("false");
-                } else if (node.type.equals(Node_Type.IDENTIFIER)) {
+                } else if (node.type.equals(Node_Type.T_TRUE)) {
+                    return new Bool("true");
+                } else if (node.type.equals(Node_Type.DUMMY)) {
                     return new Dummy();
                 } else {
-                    System.out.println("Err node: " + node.value);
-                    return new Err();
+                    System.out.println("Error node: " + node.value);
+                    return new Error_Msg();
                 }
         }
     }
 
-    public B getB(AST_Node node) {
-        B b = new B();
-        b.symbols = this.getPreOrderTraverse(node);
-        return b;
+    public B get_B(AST_Node node) {
+        B Sym_B = new B();
+        Sym_B.symbols = this.preOrder_Traversal(node);
+        return Sym_B;
     }
 
-    public Lambda getLambda(AST_Node node) {
+    public Lambda get_Lambda(AST_Node node) {
         Lambda lambda = new Lambda(this.i++);
+
         lambda.setDelta(this.getDelta(node.children.get(0)));
         if (",".equals(node.children.get(node.children.size() - 1).value)) {
             for (int i = node.children.get(node.children.size() - 1).children.size() - 1; i >= 0; i--) {
@@ -90,19 +94,19 @@ public class CSEMachineFactory {
         return lambda;
     }
 
-    private ArrayList<Symbol> getPreOrderTraverse(AST_Node node) {
+    private ArrayList<Symbol> preOrder_Traversal(AST_Node node) {
         ArrayList<Symbol> symbols = new ArrayList<Symbol>();
         if ("lambda".equals(node.value)) {
-            symbols.add(this.getLambda(node));
+            symbols.add(this.get_Lambda(node));
         } else if ("->".equals(node.value)) {
             symbols.add(this.getDelta(node.children.get(1)));
             symbols.add(this.getDelta(node.children.get(0)));
             symbols.add(new Beta());
-            symbols.add(this.getB(node.children.get(2)));
+            symbols.add(this.get_B(node.children.get(2)));
         } else {
             symbols.add(this.getSymbol(node));
             for (int i = node.children.size() - 1; i >= 0; i--) {
-                symbols.addAll(this.getPreOrderTraverse(node.children.get(i)));
+                symbols.addAll(this.preOrder_Traversal(node.children.get(i)));
             }
         }
         return symbols;
@@ -110,30 +114,30 @@ public class CSEMachineFactory {
 
     public Delta getDelta(AST_Node node) {
         Delta delta = new Delta(this.j++);
-        delta.symbols = this.getPreOrderTraverse(node);
+        delta.symbols = this.preOrder_Traversal(node);
         return delta;
     }
 
-    public ArrayList<Symbol> getControl(List<AST_Node> AST) {
+    public ArrayList<Symbol> initialize_Control_Struct(List<AST_Node> AST) {
         ArrayList<Symbol> control = new ArrayList<Symbol>();
         control.add(this.e0);
         control.add(this.getDelta(AST.get(0)));
         return control;
     }
 
-    public ArrayList<Symbol> getStack() {
+    public ArrayList<Symbol> initialize_Stack() {
         ArrayList<Symbol> stack = new ArrayList<Symbol>();
         stack.add(this.e0);
         return stack;
     }
 
-    public ArrayList<E> getEnvironment() {
-        ArrayList<E> environment = new ArrayList<E>();
+    public ArrayList<Environment> getEnvironment() {
+        ArrayList<Environment> environment = new ArrayList<Environment>();
         environment.add(this.e0);
         return environment;
     }
 
-    public CSEMachine getCSEMachine(List<AST_Node> AST) {
-        return new CSEMachine(this.getControl(AST), this.getStack(), this.getEnvironment());
+    public CSEMachine initialize_CSEMachine(List<AST_Node> AST) {
+        return new CSEMachine(this.initialize_Control_Struct(AST), this.initialize_Stack(), this.getEnvironment());
     }
 }

@@ -2,13 +2,13 @@ package Symbols;
 
 import java.util.HashMap;
 
-public class E extends Symbol {
+public class Environment extends Symbol {
     private int index;
-    private E parent;
+    private Environment parent;
     private boolean isRemoved = false;
     public HashMap<Id,Symbol> values;
     
-    public E(int i) {
+    public Environment(int i) {
         super("e");
         this.setIndex(i);
         this.values = new HashMap<Id,Symbol>();
@@ -22,11 +22,11 @@ public class E extends Symbol {
         return this.index;
     }
     
-    public void setParent(E e) {
+    public void setParent(Environment e) {
         this.parent = e;
     }
     
-    public E getParent() {
+    public Environment getParent() {
         return this.parent;
     }
     

@@ -6,9 +6,9 @@ import java.util.ArrayList;
 public class CSEMachine {
     private ArrayList<Symbol> control;
     private ArrayList<Symbol> stack;
-    private ArrayList<E> environment;
+    private ArrayList<Environment> environment;
 
-    public CSEMachine(ArrayList<Symbol> control, ArrayList<Symbol> stack, ArrayList<E> environment) {
+    public CSEMachine(ArrayList<Symbol> control, ArrayList<Symbol> stack, ArrayList<Environment> environment) {
         this.setControl(control);
         this.setStack(stack);
         this.setEnvironment(environment);
@@ -22,36 +22,45 @@ public class CSEMachine {
         this.stack = stack;
     }
 
-    public void setEnvironment(ArrayList<E> environment) {
+    public void setEnvironment(ArrayList<Environment> environment) {
         this.environment = environment;
     }
 
-    public void execute() {
-        E currentEnvironment = this.environment.get(0);
+
+
+    /*
+     * ############### implementation of CSE Machine Rules #####################
+     */
+    public void execute() throws Exception {
+        Environment curr_Env = this.environment.get(0);
         int j = 1;
         while (!control.isEmpty()) {
-            // printControl();
-            // printStack();
-            // printEnvironment();
+            
             // pop last element of the control
-            Symbol currentSymbol = control.get(control.size() - 1);
-            control.remove(control.size() - 1);
-            // rule no. 1
-            if (currentSymbol instanceof Id) {
-                this.stack.add(0, currentEnvironment.lookup((Id) currentSymbol));
-                // rule no. 2
-            } else if (currentSymbol instanceof Lambda) {
-                Lambda lambda = (Lambda) currentSymbol;
-                lambda.setEnvironment(currentEnvironment.getIndex());
+            Symbol curr_Symbol = control.remove(control.size() - 1);
+            
+            //############### rule no. 1 ##################
+
+            if (curr_Symbol instanceof Id) {
+                this.stack.add(0, curr_Env.lookup((Id) curr_Symbol));
+
+            //################ rule no. 2  ################
+
+            } else if (curr_Symbol instanceof Lambda) {
+                Lambda lambda = (Lambda) curr_Symbol;
+                lambda.setEnvironment(curr_Env.getIndex());
                 this.stack.add(0, lambda);
-                // rule no. 3, 4, 10, 11, 12 & 13
-            } else if (currentSymbol instanceof Gamma) {
-                Symbol nextSymbol = this.stack.get(0); // Symbol at the top of stack
-                this.stack.remove(0);
-                // lambda (rule no. 4 & 11)
+
+                //################ rule no. 3, 4, 10, 11, 12 & 13  #####################
+
+            } else if (curr_Symbol instanceof Gamma) {
+                Symbol nextSymbol = this.stack.remove(0);// Symbol at the top of stack
+                
+                //#################### lambda (rule no. 4 & 11) ######################
+
                 if (nextSymbol instanceof Lambda) {
                     Lambda lambda = (Lambda) nextSymbol;
-                    E e = new E(j++);
+                    Environment e = new Environment(j++);
                     if (lambda.identifiers.size() == 1) {
                         e.values.put(lambda.identifiers.get(0), this.stack.get(0));
                         this.stack.remove(0);
@@ -63,23 +72,26 @@ public class CSEMachine {
                             e.values.put(id, tup.symbols.get(i++));
                         }
                     }
-                    for (E environment : this.environment) {
+                    for (Environment environment : this.environment) {
                         if (environment.getIndex() == lambda.getEnvironment()) {
                             e.setParent(environment);
                         }
                     }
-                    currentEnvironment = e;
+                    curr_Env = e;
                     this.control.add(e);
                     this.control.add(lambda.getDelta());
                     this.stack.add(0, e);
                     this.environment.add(e);
-                    // tup (rule no. 10)
+
+                    // ################### tup (rule no. 10)  #############################
+
                 } else if (nextSymbol instanceof Tup) {
                     Tup tup = (Tup) nextSymbol;
                     int i = Integer.parseInt(this.stack.get(0).getData());
                     this.stack.remove(0);
                     this.stack.add(0, tup.symbols.get(i - 1));
-                    // ystar (rule no. 12)
+
+                    // ###################  Ystar (rule no. 12)  ##########################
                 } else if (nextSymbol instanceof Ystar) {
                     Lambda lambda = (Lambda) this.stack.get(0);
                     this.stack.remove(0);
@@ -89,44 +101,42 @@ public class CSEMachine {
                     eta.setIdentifier(lambda.identifiers.get(0));
                     eta.setLambda(lambda);
                     this.stack.add(0, eta);
-                    // eta (rule no. 13)
+
+                    // ######################## eta (rule no. 13)  ################################
                 } else if (nextSymbol instanceof Eta) {
                     Eta eta = (Eta) nextSymbol;
-                    Lambda lambda = eta.getLambda();
+                    Lambda lambda = eta.get_Lambda();
                     this.control.add(new Gamma());
                     this.control.add(new Gamma());
                     this.stack.add(0, eta);
                     this.stack.add(0, lambda);
-                    // builtin functions
+
+                    // #####################  built_in functions in RPAL ##############################
                 } else {
                     if ("Print".equals(nextSymbol.getData())) {
-                        // do nothing
+                        // !!!! do nothing  !!!!!!!!!
+
                     } else if ("Stem".equals(nextSymbol.getData())) {
-                        Symbol s = this.stack.get(0);
-                        this.stack.remove(0);
+                        Symbol s = this.stack.remove(0);
                         s.setData(s.getData().substring(0, 1));
                         this.stack.add(0, s);
-                    } else if ("Stern".equals(nextSymbol.getData())) {
-                        Symbol s = this.stack.get(0);
-                        this.stack.remove(0);
-                        s.setData(s.getData().substring(1));
-                        this.stack.add(0, s);
-                    } else if ("Conc".equals(nextSymbol.getData())) {
-                        Symbol s1 = this.stack.get(0);
-                        Symbol s2 = this.stack.get(1);
-                        this.stack.remove(0);
-                        this.stack.remove(0);
-                        s1.setData(s1.getData() + s2.getData());
-                        this.stack.add(0, s1);
+                        
                     } else if ("Order".equals(nextSymbol.getData())) {
-                        Tup tup = (Tup) this.stack.get(0);
-                        this.stack.remove(0);
+                        Tup tup = (Tup) this.stack.remove(0);
                         Int n = new Int(Integer.toString(tup.symbols.size()));
                         this.stack.add(0, n);
-                    } else if ("Null".equals(nextSymbol.getData())) {
-                        // implement
-                    } else if ("Itos".equals(nextSymbol.getData())) {
-                        // implement
+
+                    } else if ("Stern".equals(nextSymbol.getData())) {
+                        Symbol s = this.stack.remove(0);
+                        s.setData(s.getData().substring(1));
+                        this.stack.add(0, s);
+
+                    } else if ("Conc".equals(nextSymbol.getData())) {
+                        Symbol s1 = this.stack.remove(0);
+                        Symbol s2 = this.stack.remove(0);
+                        s1.setData(s1.getData() + s2.getData());
+                        this.stack.add(0, s1);
+
                     } else if ("Isinteger".equals(nextSymbol.getData())) {
                         if (this.stack.get(0) instanceof Int) {
                             this.stack.add(0, new Bool("true"));
@@ -134,6 +144,7 @@ public class CSEMachine {
                             this.stack.add(0, new Bool("false"));
                         }
                         this.stack.remove(1);
+
                     } else if ("Isstring".equals(nextSymbol.getData())) {
                         if (this.stack.get(0) instanceof Str) {
                             this.stack.add(0, new Bool("true"));
@@ -141,6 +152,7 @@ public class CSEMachine {
                             this.stack.add(0, new Bool("false"));
                         }
                         this.stack.remove(1);
+
                     } else if ("Istuple".equals(nextSymbol.getData())) {
                         if (this.stack.get(0) instanceof Tup) {
                             this.stack.add(0, new Bool("true"));
@@ -148,6 +160,7 @@ public class CSEMachine {
                             this.stack.add(0, new Bool("false"));
                         }
                         this.stack.remove(1);
+
                     } else if ("Isdummy".equals(nextSymbol.getData())) {
                         if (this.stack.get(0) instanceof Dummy) {
                             this.stack.add(0, new Bool("true"));
@@ -155,6 +168,7 @@ public class CSEMachine {
                             this.stack.add(0, new Bool("false"));
                         }
                         this.stack.remove(1);
+
                     } else if ("Istruthvalue".equals(nextSymbol.getData())) {
                         if (this.stack.get(0) instanceof Bool) {
                             this.stack.add(0, new Bool("true"));
@@ -162,6 +176,7 @@ public class CSEMachine {
                             this.stack.add(0, new Bool("false"));
                         }
                         this.stack.remove(1);
+
                     } else if ("Isfunction".equals(nextSymbol.getData())) {
                         if (this.stack.get(0) instanceof Lambda) {
                             this.stack.add(0, new Bool("true"));
@@ -169,81 +184,94 @@ public class CSEMachine {
                             this.stack.add(0, new Bool("false"));
                         }
                         this.stack.remove(1);
+
+                    } else if ("Null".equals(nextSymbol.getData())) {
+                        // implement
+                    } else if ("Itos".equals(nextSymbol.getData())) {
+                        // implement
                     }
                 }
-                // rule no. 5
-            } else if (currentSymbol instanceof E) {
+                // ########################## rule no. 5  ###############################
+            } else if (curr_Symbol instanceof Environment) {
                 // System.out.println(this.stack.size());
                 // System.out.println(this.stack.get(0).getData());
 
                 this.stack.remove(1);
 
-                this.environment.get(((E) currentSymbol).getIndex()).setIsRemoved(true);
-                int y = this.environment.size();
-                while (y > 0) {
-                    if (!this.environment.get(y - 1).getIsRemoved()) {
-                        currentEnvironment = this.environment.get(y - 1);
+                this.environment.get(((Environment) curr_Symbol).getIndex()).setIsRemoved(true);
+                int env_size = this.environment.size();
+
+                while (env_size > 0) {
+                    if (!this.environment.get(env_size - 1).getIsRemoved()) {
+                        curr_Env = this.environment.get(env_size - 1);
                         break;
                     } else {
-                        y--;
+                        env_size--;
                     }
                 }
-                // rule no. 6 & 7
-            } else if (currentSymbol instanceof Rator) {
-                if (currentSymbol instanceof Uop) {
-                    Symbol rator = currentSymbol;
-                    Symbol rand = this.stack.get(0);
-                    this.stack.remove(0);
-                    stack.add(0, this.applyUnaryOperation(rator, rand));
+
+            // ###################### rule no. 6 & 7  ##############################
+
+            } else if (curr_Symbol instanceof Rator) {
+
+                if (curr_Symbol instanceof Uop) {
+                    Symbol operator = curr_Symbol;
+                    Symbol rand = this.stack.remove(0);
+                    stack.add(0, this.applyUnaryOperation(operator, rand));
                 }
-                if (currentSymbol instanceof Bop) {
-                    Symbol rator = currentSymbol;
-                    Symbol rand1 = this.stack.get(0);
-                    Symbol rand2 = this.stack.get(1);
-                    // System.out.println(rand2);
-                    this.stack.remove(0);
-                    this.stack.remove(0);
-                    this.stack.add(0, this.applyBinaryOperation(rator, rand1, rand2));
+
+                if (curr_Symbol instanceof Binary_Op) {
+                    Symbol operator = curr_Symbol;
+                    Symbol operand1 = this.stack.remove(0);
+                    Symbol operand2 = this.stack.remove(0);
+                    
+                    this.stack.add(0, this.apply_BinOp(operator, operand1, operand2));
                 }
-                // rule no. 8
-            } else if (currentSymbol instanceof Beta) {
+
+            // ########################  rule no. 8   ################################
+            } else if (curr_Symbol instanceof Beta) {
                 if (Boolean.parseBoolean(this.stack.get(0).getData())) {
                     this.control.remove(control.size() - 1);
                 } else {
                     this.control.remove(control.size() - 2);
                 }
                 this.stack.remove(0);
-                // rule no. 9
-            } else if (currentSymbol instanceof Tau) {
-                Tau tau = (Tau) currentSymbol;
+
+            // ########################### rule no. 9 ###############################
+
+            } else if (curr_Symbol instanceof Tau) {
+                Tau tau = (Tau) curr_Symbol;
                 Tup tup = new Tup();
                 for (int i = 0; i < tau.getN(); i++) {
-                    tup.symbols.add(this.stack.get(0));
-                    this.stack.remove(0);
+                    tup.symbols.add(this.stack.remove(0));
                 }
                 this.stack.add(0, tup);
-            } else if (currentSymbol instanceof Delta) {
-                this.control.addAll(((Delta) currentSymbol).symbols);
-            } else if (currentSymbol instanceof B) {
-                this.control.addAll(((B) currentSymbol).symbols);
+
+            } else if (curr_Symbol instanceof Delta) {
+                this.control.addAll(((Delta) curr_Symbol).symbols);
+
+            } else if (curr_Symbol instanceof B) {
+                this.control.addAll(((B) curr_Symbol).symbols);
+
             } else {
-                this.stack.add(0, currentSymbol);
+                this.stack.add(0, curr_Symbol);
             }
         }
     }
 
     public void printControl() {
         System.out.print("Control: ");
+
         for (Symbol symbol : this.control) {
             System.out.print(symbol.getData());
             if (symbol instanceof Lambda) {
                 System.out.print(((Lambda) symbol).getIndex());
-            } else if (symbol instanceof Delta) {
-                System.out.print(((Delta) symbol).getIndex());
-            } else if (symbol instanceof E) {
-                System.out.print(((E) symbol).getIndex());
             } else if (symbol instanceof Eta) {
                 System.out.print(((Eta) symbol).getIndex());
+            } else if (symbol instanceof Delta) {
+                System.out.print(((Delta) symbol).getIndex());
+            } else if (symbol instanceof Environment) {
+                System.out.print(((Environment) symbol).getIndex());
             }
             System.out.print(",");
         }
@@ -251,17 +279,18 @@ public class CSEMachine {
     }
 
     public void printStack() {
+
         System.out.print("Stack: ");
         for (Symbol symbol : this.stack) {
             System.out.print(symbol.getData());
             if (symbol instanceof Lambda) {
                 System.out.print(((Lambda) symbol).getIndex());
-            } else if (symbol instanceof Delta) {
-                System.out.print(((Delta) symbol).getIndex());
-            } else if (symbol instanceof E) {
-                System.out.print(((E) symbol).getIndex());
             } else if (symbol instanceof Eta) {
                 System.out.print(((Eta) symbol).getIndex());
+            } else if (symbol instanceof Delta) {
+                System.out.print(((Delta) symbol).getIndex());
+            } else if (symbol instanceof Environment) {
+                System.out.print(((Environment) symbol).getIndex());
             }
             System.out.print(",");
         }
@@ -269,100 +298,103 @@ public class CSEMachine {
     }
 
     public void printEnvironment() {
+
         for (Symbol symbol : this.environment) {
-            System.out.print("e" + ((E) symbol).getIndex() + " --> ");
-            if (((E) symbol).getIndex() != 0) {
-                System.out.println("e" + ((E) symbol).getParent().getIndex());
+            System.out.print("e" + ((Environment) symbol).getIndex() + " --> ");
+            if (((Environment) symbol).getIndex() != 0) {
+                System.out.println("e" + ((Environment) symbol).getParent().getIndex());
             } else {
                 System.out.println();
             }
         }
     }
 
-    public Symbol applyUnaryOperation(Symbol rator, Symbol rand) {
-        if ("neg".equals(rator.getData())) {
-            int val = Integer.parseInt(rand.getData());
-            return new Int(Integer.toString(-1 * val));
-        } else if ("not".equals(rator.getData())) {
+    public Symbol applyUnaryOperation(Symbol operator, Symbol rand) {
+
+        if ("not".equals(operator.getData())) {
             boolean val = Boolean.parseBoolean(rand.getData());
             return new Bool(Boolean.toString(!val));
+        }else if ("neg".equals(operator.getData())) {
+            int val = Integer.parseInt(rand.getData());
+            return new Int(Integer.toString(-1 * val));
         } else {
-            return new Err();
+            return new Error_Msg();
         }
     }
 
-    public Symbol applyBinaryOperation(Symbol rator, Symbol rand1, Symbol rand2) {
-        if ("+".equals(rator.getData())) {
-            int val1 = Integer.parseInt(rand1.getData());
-            int val2 = Integer.parseInt(rand2.getData());
-            return new Int(Integer.toString(val1 + val2));
-        } else if ("-".equals(rator.getData())) {
-            int val1 = Integer.parseInt(rand1.getData());
-            int val2 = Integer.parseInt(rand2.getData());
-            return new Int(Integer.toString(val1 - val2));
-        } else if ("*".equals(rator.getData())) {
-            int val1 = Integer.parseInt(rand1.getData());
-            int val2 = Integer.parseInt(rand2.getData());
+    public Symbol apply_BinOp(Symbol operator, Symbol operand1, Symbol operand2) {
+
+        if ("*".equals(operator.getData())) {
+            int val1 = Integer.parseInt(operand1.getData());
+            int val2 = Integer.parseInt(operand2.getData());
             return new Int(Integer.toString(val1 * val2));
-        } else if ("/".equals(rator.getData())) {
-            int val1 = Integer.parseInt(rand1.getData());
-            int val2 = Integer.parseInt(rand2.getData());
+        } else if ("/".equals(operator.getData())) {
+            int val1 = Integer.parseInt(operand1.getData());
+            int val2 = Integer.parseInt(operand2.getData());
             return new Int(Integer.toString(val1 / val2));
-        } else if ("**".equals(rator.getData())) {
-            int val1 = Integer.parseInt(rand1.getData());
-            int val2 = Integer.parseInt(rand2.getData());
+        } else if ("**".equals(operator.getData())) {
+            int val1 = Integer.parseInt(operand1.getData());
+            int val2 = Integer.parseInt(operand2.getData());
             return new Int(Integer.toString((int) Math.pow(val1, val2)));
-        } else if ("&".equals(rator.getData())) {
-            boolean val1 = Boolean.parseBoolean(rand1.getData());
-            boolean val2 = Boolean.parseBoolean(rand2.getData());
+        }else if ("+".equals(operator.getData())) {
+            int val1 = Integer.parseInt(operand1.getData());
+            int val2 = Integer.parseInt(operand2.getData());
+            return new Int(Integer.toString(val1 + val2));
+        } else if ("-".equals(operator.getData())) {
+            int val1 = Integer.parseInt(operand1.getData());
+            int val2 = Integer.parseInt(operand2.getData());
+            return new Int(Integer.toString(val1 - val2));
+        
+        } else if ("&".equals(operator.getData())) {
+            boolean val1 = Boolean.parseBoolean(operand1.getData());
+            boolean val2 = Boolean.parseBoolean(operand2.getData());
             return new Bool(Boolean.toString(val1 && val2));
-        } else if ("or".equals(rator.getData())) {
-            boolean val1 = Boolean.parseBoolean(rand1.getData());
-            boolean val2 = Boolean.parseBoolean(rand2.getData());
+        } else if ("or".equals(operator.getData())) {
+            boolean val1 = Boolean.parseBoolean(operand1.getData());
+            boolean val2 = Boolean.parseBoolean(operand2.getData());
             return new Bool(Boolean.toString(val1 || val2));
-        } else if ("eq".equals(rator.getData())) {
-            String val1 = rand1.getData();
-            String val2 = rand2.getData();
-            return new Bool(Boolean.toString(val1.equals(val2)));
-        } else if ("ne".equals(rator.getData())) {
-            String val1 = rand1.getData();
-            String val2 = rand2.getData();
-            return new Bool(Boolean.toString(!val1.equals(val2)));
-        } else if ("ls".equals(rator.getData())) {
-            int val1 = Integer.parseInt(rand1.getData());
-            int val2 = Integer.parseInt(rand2.getData());
+        } else if ("gr".equals(operator.getData())) {
+            int val1 = Integer.parseInt(operand1.getData());
+            int val2 = Integer.parseInt(operand2.getData());
+            return new Bool(Boolean.toString(val1 > val2));
+        } else if ("ge".equals(operator.getData())) {
+            int val1 = Integer.parseInt(operand1.getData());
+            int val2 = Integer.parseInt(operand2.getData());
+            return new Bool(Boolean.toString(val1 >= val2));
+        } else if ("ls".equals(operator.getData())) {
+            int val1 = Integer.parseInt(operand1.getData());
+            int val2 = Integer.parseInt(operand2.getData());
             return new Bool(Boolean.toString(val1 < val2));
-        } else if ("le".equals(rator.getData())) {
-            int val1 = Integer.parseInt(rand1.getData());
-            String s1 = rand2.getData();
-            // System.out.println(s1);
+        } else if ("le".equals(operator.getData())) {
+            int val1 = Integer.parseInt(operand1.getData());
+            String s1 = operand2.getData();
             int val2 = Integer.parseInt(s1);
             return new Bool(Boolean.toString(val1 <= val2));
-        } else if ("gr".equals(rator.getData())) {
-            int val1 = Integer.parseInt(rand1.getData());
-            int val2 = Integer.parseInt(rand2.getData());
-            return new Bool(Boolean.toString(val1 > val2));
-        } else if ("ge".equals(rator.getData())) {
-            int val1 = Integer.parseInt(rand1.getData());
-            int val2 = Integer.parseInt(rand2.getData());
-            return new Bool(Boolean.toString(val1 >= val2));
-        } else if ("aug".equals(rator.getData())) {
-            if (rand2 instanceof Tup) {
-                ((Tup) rand1).symbols.addAll(((Tup) rand2).symbols);
+        } else if ("eq".equals(operator.getData())) {
+            String val1 = operand1.getData();
+            String val2 = operand2.getData();
+            return new Bool(Boolean.toString(val1.equals(val2)));
+        } else if ("ne".equals(operator.getData())) {
+            String val1 = operand1.getData();
+            String val2 = operand2.getData();
+            return new Bool(Boolean.toString(!val1.equals(val2)));
+        } else if ("aug".equals(operator.getData())) {
+            if (operand2 instanceof Tup) {
+                ((Tup) operand1).symbols.addAll(((Tup) operand2).symbols);
             } else {
-                ((Tup) rand1).symbols.add(rand2);
+                ((Tup) operand1).symbols.add(operand2);
             }
-            return rand1;
+            return operand1;
         } else {
-            return new Err();
+            return new Error_Msg();
         }
     }
 
-    public String getTupleValue(Tup tup) {
+    public String get_Tup_Value(Tup tup) {
         String temp = "(";
         for (Symbol symbol : tup.symbols) {
             if (symbol instanceof Tup) {
-                temp = temp + this.getTupleValue((Tup) symbol) + ", ";
+                temp = temp + this.get_Tup_Value((Tup) symbol) + ", ";
             } else {
                 temp = temp + symbol.getData() + ", ";
             }
@@ -371,10 +403,10 @@ public class CSEMachine {
         return temp;
     }
 
-    public String getAnswer() {
+    public String compute_Answer() throws Exception {
         this.execute();
         if (stack.get(0) instanceof Tup) {
-            return this.getTupleValue((Tup) stack.get(0));
+            return this.get_Tup_Value((Tup) stack.get(0));
         }
         return stack.get(0).getData();
     }

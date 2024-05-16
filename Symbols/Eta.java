@@ -34,7 +34,7 @@ public class Eta extends Symbol {
         this.lambda = lambda;
     }
     
-    public Lambda getLambda() {
+    public Lambda get_Lambda() {
         return this.lambda;
     }
     

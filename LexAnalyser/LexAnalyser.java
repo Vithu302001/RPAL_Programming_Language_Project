@@ -1,6 +1,9 @@
 package LexAnalyser;
 
+import Exception.Lexical_Exception;
+
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,15 +19,10 @@ public class LexAnalyser {
         this.fileName = fileName;
     }
 
-    // Custom exception for lexical errors
-    static class Lexical_Exception extends Exception {
-        Lexical_Exception(String message) {
-            super(message);
-        }
-    }
+    
 
     // Method to scan the input file and tokenize it
-    public List<Token> scanner() {
+    public List<Token> scanner () {
 
         try (FileReader fileReader = new FileReader(fileName);
                 BufferedReader reader = new BufferedReader(fileReader)) {
@@ -42,9 +40,13 @@ public class LexAnalyser {
                     System.out.println("Error while reading line " + lineCount + ": " + e.getMessage());
                 }
             }
-        } catch (IOException e) {
+        } catch (FileNotFoundException e) {
 
-            e.printStackTrace();
+            System.out.println("File not found in the current directory");
+
+        }catch(IOException e){
+
+            System.out.println("IOException !!!");
         }
 
         return screener(tokens);
@@ -59,7 +61,7 @@ public class LexAnalyser {
 
             char current_Charector = line.charAt(index_var);
 
-            // Handling identifiers and keywords
+            // ###################### Handling identifiers and keywords ##########################
             if (Character.isLetter(current_Charector)) {
 
                 current_Token.append(current_Charector);
@@ -80,7 +82,9 @@ public class LexAnalyser {
 
                 current_Token.setLength(0); // Clearing the token buffer
             }
-            // Handling integers
+
+            //########################### Handling integers  ##############################
+
             else if (Character.isDigit(current_Charector)) {
                 current_Token.append(current_Charector);
 
@@ -92,7 +96,9 @@ public class LexAnalyser {
                 tokens.add(new Token(TokenType.INTEGER, current_Token.toString(), lineCount));
                 current_Token.setLength(0);
             }
-            // Handling operators
+
+            //################################ Handling operators  ##############################
+
             else if (isOperator(current_Charector)) {
 
                 current_Token.append(current_Charector);
@@ -104,7 +110,9 @@ public class LexAnalyser {
                 tokens.add(new Token(TokenType.OPERATOR, current_Token.toString(), lineCount));
                 current_Token.setLength(0);
             }
-            // Handling string literals
+
+            //############################### Handling string literals ###############################
+
             else if (current_Charector == '\'') {
                 current_Token.append(current_Charector);
 
@@ -122,7 +130,9 @@ public class LexAnalyser {
                 }
 
             }
-            // Handling punctuation
+
+            //################################# Handling punctuation  ################################
+
             else if (isPunctuation(current_Charector)) {
 
                 tokens.add(new Token(TokenType.PUNCTUATION, String.valueOf(current_Charector), lineCount));
@@ -136,7 +146,8 @@ public class LexAnalyser {
         }
     }
 
-    // Method to check if a token is a keyword
+    // ######################## Method to check if a token is a keyword  #####################
+
     private boolean isKeyword(String token) {
         List<String> keywords = List.of(
                 "let", "in", "fn", "where", "aug", "or", "not", "gr", "ge", "ls",
@@ -145,21 +156,23 @@ public class LexAnalyser {
         return keywords.contains(token);
     }
 
-    // Method to check if a character is an operator
-    private boolean isOperator(char character) {
-
-        String operators = "+-*/<>&.@/:=~|$!#%^_[]{}\"`?";
-        return operators.indexOf(character) != -1;
-    }
-
-    // Method to check if a character is a punctuation mark
+    //####################### Method to check if a character is a punctuation mark ###################
     private boolean isPunctuation(char character) {
 
         String punctuation = "(),;";
         return punctuation.indexOf(character) != -1;
     }
 
-    // Method to filter out whitespace and comments
+    //###################### Method to check if a character is an operator ######################
+    private boolean isOperator(char character) {
+
+        String operators = "+-*/<>&.@/:=~|$!#%^_[]{}\"`?";
+        return operators.indexOf(character) != -1;
+    }
+
+    
+
+    // ################## Method to filter out whitespace and comments ##########################
     public List<Token> screener(List<Token> tokens) {
 
         List<Token> filteredTokens = new ArrayList<>();

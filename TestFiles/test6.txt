@@ -1,0 +1,6 @@
+let fact N =
+    let rec fact_helper n Acc =
+        n eq 0 -> Acc
+        | fact_helper (n - 1) (Acc * n)
+    in fact_helper N 1
+in Print(fact 10)
