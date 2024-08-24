@@ -1,0 +1,13 @@
+How to Run:
+
+1)The whole packages will be inside the zipped file.So first you need to extract the file.
+
+2)Then in the terminal go to the extracted file directory
+use ‘make’ command if you are using Ubuntu or Linux terminal. So the make file will execute the compile command. or if you are using windows cmd use ‘javac myrpal.java’ command to compile the interpreter(CSE machine).
+
+!!!!!!!!!!! sometimes make command may not work because of  inside the make file we faced a indentation issue while created the make file in windows and run in the ubuntu. There is a issue with the space make using Tab key in windows change in Ubuntu.We don't know what is the issue with that.But it happened twice. So if make not work.Try to correct the indentation in the make file !!!!!!!!!!!!!!!!! 
+
+3)Now you can use commands like below ones to run the program
+'java myrpal test1'
+'java myrpal test1 -ast'
+'java myrpal test1 -st'
